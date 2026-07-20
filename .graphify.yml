@@ -1,0 +1,60 @@
+# Graphify configuration for FamilyWall clone (Flutter)
+# Docs: https://github.com/zegh6389/graphify
+# Run via `graphify update .`
+# Auto-installed by GitHub Actions CI job `graphify-refresh` on push to main.
+
+project:
+  name: familywall-clone
+  type: flutter-app
+  description: "1:1 Flutter rebuild of FamilyWall Family Organizer (Android + iOS)"
+  language: dart
+
+include:
+  - "app/lib/**/*.dart"
+  - "app/test/**/*.dart"
+  - "app/android/app/src/main/kotlin/**/*.kt"
+
+exclude:
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "**/build/**"
+  - "**/.dart_tool/**"
+  - "**/.idea/**"
+  - "**/android/.gradle/**"
+
+output:
+  path: graphify-out
+  format: markdown+json
+  generate:
+    - GRAPH_REPORT.md
+    - graph.json
+    - manifest.json
+    - communities.json
+
+graph:
+  extract:
+    - imports
+    - classes
+    - functions
+    - methods
+    - constants
+    - providers
+    - routes
+  infer:
+    - call_relationships
+    - layer_relationships
+    - feature_module_boundaries
+    - data_layer_to_ui_flow
+  confidence_threshold: 0.3
+
+# Per-folder hints surfaced in GRAPH_REPORT.md "package profiles"
+package_hints:
+  "lib/features/": user-visible screens
+  "lib/data/api/": REST client + interceptors
+  "lib/data/db/": Drift tables + DAOs (local persistence)
+  "lib/data/model/": Plain DTOs (request/response shapes)
+  "lib/di/": Riverpod provider wiring
+  "lib/services/": Platform integrations (FCM, location, widgets)
+  "lib/widgets/": Custom Flutter widgets
+  "lib/theme/": M3 theme + tokens
+  "lib/util/": Cross-cutting helpers
