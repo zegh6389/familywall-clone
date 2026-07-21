@@ -1,4 +1,4 @@
-package com.securelife.familywall_clone
+package com.securelife.familywall
 
 import io.flutter.embedding.android.FlutterActivity
 
