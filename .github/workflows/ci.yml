@@ -52,28 +52,32 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            .dart_tool
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+            app/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('app/pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-pub-
 
       - name: Install dependencies
+        working-directory: app
         run: flutter pub get
 
       - name: Generate code (Drift, freezed, json_serializable)
+        working-directory: app
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Static analysis
+        working-directory: app
         run: flutter analyze --fatal-infos --fatal-warnings
 
       - name: Run tests with coverage
+        working-directory: app
         run: flutter test --coverage --reporter expanded
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/
+          path: app/coverage/
 
   build-android-debug:
     name: Build Android Debug APK
@@ -98,29 +102,33 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            .dart_tool
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+            app/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('app/pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-pub-
 
       - name: Make local.properties (Android SDK)
+        working-directory: app/android
         run: |
-          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Install dependencies
+        working-directory: app
         run: flutter pub get
 
       - name: Generate code
+        working-directory: app
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build APK (debug)
+        working-directory: app
         run: flutter build apk --debug --no-tree-shake-icons
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: familywall-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -147,24 +155,31 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            .dart_tool
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+            app/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('app/pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - run: echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+      - name: Make local.properties
+        working-directory: app/android
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-      - run: flutter pub get
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
 
-      - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Generate code
+        working-directory: app
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build APK (release, no signing for CI)
+        working-directory: app
         run: flutter build apk --release --no-tree-shake-icons
 
       - uses: actions/upload-artifact@v4
         with:
           name: familywall-release-apk-unsigned
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
 
   build-web:
@@ -185,22 +200,27 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            .dart_tool
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+            app/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('app/pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - run: flutter pub get
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
 
-      - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Generate code
+        working-directory: app
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build web (release)
+        working-directory: app
         run: flutter build web --release
 
       - uses: actions/upload-artifact@v4
         with:
           name: familywall-web-release
-          path: build/web/
+          path: app/build/web/
           retention-days: 14
 
   build-ios:
@@ -217,17 +237,22 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
 
-      - run: flutter pub get
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
 
-      - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Generate code
+        working-directory: app
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS (no codesign)
+        working-directory: app
         run: flutter build ios --release --no-codesign
 
       - uses: actions/upload-artifact@v4
         with:
           name: familywall-ios-app
-          path: build/ios/iphoneos/Runner.app
+          path: app/build/ios/iphoneos/Runner.app
           retention-days: 14
 
   graphify-refresh:
